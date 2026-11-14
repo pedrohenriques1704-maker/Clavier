@@ -262,5 +262,13 @@ document.getElementById('importFile').addEventListener('change',async e=>{try{co
    case 'remove':if(Object.keys(state.draft||{}).length||state.note){toast('Finalize o treino em andamento antes de retirar a orientação.');break}if(confirm('Retirar a orientação do professor sem apagar seu histórico?')){delete state.chatTeacherPlan;save();render()}break;
  }},true);
 })();
-render();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+const oldVersionRender=render;
+render=function(){oldVersionRender();const nav=document.getElementById('main');if(nav){nav.insertAdjacentHTML('beforeend','<div class="card" style="margin-top:16px"><div class="between"><small>Clavier · versão 5.1.1</small><button data-audio-test="1">♪ Testar áudio</button></div><button data-refresh-app="1" class="inlinebtn">Verificar atualização</button><p class="notice">O histórico fica salvo neste dispositivo.</p></div>')}};
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-refresh-app]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.update()).catch(()=>{});const u=new URL(location.href);u.searchParams.set('v','5.1.1-'+Date.now());location.replace(u.href)},true);
+render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http')){
+ let refreshing=false;const controlled=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(controlled&&!refreshing){refreshing=true;location.reload()}});
+ navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
+}
 </script></body></html>
